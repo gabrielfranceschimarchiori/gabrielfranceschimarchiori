@@ -3,43 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agendamento</title>
+    <title>Agendamento de Consultas</title>
 </head>
 <body>
-    <h1>Agendamento</h1>
-    <!-- Agendamento iClinic -->
+    <h1>Agendamento de Consultas</h1>
+    
+    <form id="appointment-form">
+        <label for="name">Nome:</label>
+        <input type="text" id="name" required><br><br>
+
+        <label for="email">E-mail:</label>
+        <input type="email" id="email" required><br><br>
+
+        <label for="date">Data:</label>
+        <input type="date" id="date" required><br><br>
+
+        <label for="time">Horário:</label>
+        <input type="time" id="time" required><br><br>
+
+        <label for="duration">Duração (em minutos):</label>
+        <input type="number" id="duration" required min="15"><br><br>
+
+        <input type="submit" value="Agendar Consulta">
+    </form>
+
+    <div id="confirmation"></div>
+
     <script>
-    window.CONFIG_SUBSCRIPTION_ID = 342626;
-    window.CONFIG_CLINIC_INDEX = 0;
-    window.CONFIG_CLINIC_SELECTOR = true;
-    window.CONFIG_WHATSAPP_API_NOTIFICATION = false;
-    window.CONFIG_STYLE_OPTIONS = {
-        inheritSiteFont: true
-    };
+        // Carrega a API do Google Client
+        function loadGoogleAPI() {
+            gapi.load('client:auth2', initGoogleClient);
+        }
+
+        function initGoogleClient() {
+            gapi.client.init({
+                apiKey: 'YOUR_API_KEY',
+                clientId: 'YOUR_CLIENT_ID',
+                discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
+                scope: "https://www.googleapis.com/auth/calendar.events"
+            }).then(function () {
+                // Lidar com autenticação
+                gapi.auth2.getAuthInstance().signIn().then(function () {
+                    console.log('Autenticado');
+                });
+            });
+        }
+
+        // Função para adicionar evento à Google Calendar
+        function addEventToCalendar(event) {
+            var request = gapi.client.calendar.events.insert({
+                'calendarId': 'gabriel@franceschi.com.br',
+                'resource': event
+            });
+
+            request.execute(function (event) {
+                document.getElementById('confirmation').innerHTML = 'Consulta agendada com sucesso: ' + event.htmlLink;
+            });
+        }
+
+        document.getElementById('appointment-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            var name = document.getElementById('name').value;
+            var email = document.getElementById('email').value;
+            var date = document.getElementById('date').value;
+            var time = document.getElementById('time').value;
+            var duration = document.getElementById('duration').value;
+
+            var event = {
+                'summary': 'Consulta com ' + name,
+                'description': 'Consulta agendada por ' + email,
+                'start': {
+                    'dateTime': date + 'T' + time + ':00',
+                    'timeZone': 'America/Sao_Paulo'
+                },
+                'end': {
+                    'dateTime': date + 'T' + time + ':00',
+                    'timeZone': 'America/Sao_Paulo'
+                },
+                'attendees': [{'email': email}],
+                'reminders': {
+                    'useDefault': false,
+                    'overrides': [
+                        {'method': 'email', 'minutes': 24 * 60},
+                        {'method': 'popup', 'minutes': 10}
+                    ]
+                }
+            };
+
+            addEventToCalendar(event);
+        });
+
+        // Inicia a API do Google ao carregar a página
+        loadGoogleAPI();
     </script>
-    <style>
-    /* Theme color */
-    .style-option-first-color { color: #1f92c2; }
-    .style-option-first-color-bg { background-color: #1f92c2; }
-    .style-option-first-color-bg-hover:hover { background-color: #02aaf0; }
-    .style-option-first-color-border { border: 1px solid #1f92c2; }
 
-    /* Default background color */
-    .style-option-second-color { color: #ffffff; }
-    .style-option-second-color-bg { background-color: #ffffff; }
-    .style-option-second-color-bg-hover:hover { background-color: #f3f3f3; }
-    .style-option-second-color-border { border: 1px solid #ffffff; }
-
-    /* Rounded buttons */
-    .style-option-rounded-button { border-radius: 30px; }
-    .style-option-rounded-plus-button { border-radius: 50%; }
-    </style>
-    <div class="widget-schedule-parent-element" style="width: 1000px; max-width: 100%; margin: 0 auto;">
-        <div id="widget-schedule-root"></div>
-    </div>
-    <!-- Agendamento iClinic -->
-    <script src="https://cdn.iclinicservices.com.br/iclinic/widget-schedulev2/js/iclinic-agendar-consulta.js"></script>
+    <script async defer src="https://apis.google.com/js/api.js"></script>
 </body>
 </html>
-
-
