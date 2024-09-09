@@ -81,13 +81,5 @@
             <button type="submit">Cadastrar</button>
         </form>
     </div>
-
-    <script>
-        document.getElementById('cadastroForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Cadastro enviado! Você receberá um e-mail de confirmação em breve.');
-            // Aqui você pode adicionar código para enviar os dados para o backend ou sistema de e-mails.
-        });
-    </script>
 </body>
 </html>
