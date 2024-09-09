@@ -5,40 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agendamento de Consulta</title>
     <style>
-        /* Theme color */
+        /* Estilos fornecidos pelo iClinic para personalização */
         .style-option-first-color { color: #1f92c2; }
         .style-option-first-color-bg { background-color: #1f92c2; }
         .style-option-first-color-bg-hover:hover { background-color: #02aaf0; }
         .style-option-first-color-border { border: 1px solid #1f92c2; }
 
-        /* Default background color */
         .style-option-second-color { color: #ffffff; }
         .style-option-second-color-bg { background-color: #ffffff; }
         .style-option-second-color-bg-hover:hover { background-color: #f3f3f3; }
         .style-option-second-color-border { border: 1px solid #ffffff; }
 
-        /* Rounded buttons */
         .style-option-rounded-button { border-radius: 30px; }
         .style-option-rounded-plus-button { border-radius: 50%; }
     </style>
 </head>
 <body>
-    <!-- Agendamento iClinic -->
-    <div class="widget-schedule-parent-element" style="width: 1000px; max-width: 100%; margin: 0 auto;">
+    <!-- Container para o agendamento -->
+    <div class="widget-schedule-parent-element" style="width: 100%; max-width: 1000px; margin: 0 auto;">
         <div id="widget-schedule-root"></div>
     </div>
 
-    <!-- Agendamento iClinic -->
+    <!-- Configuração e integração do iClinic -->
     <script>
+        // Configurações do iClinic
         window.CONFIG_SUBSCRIPTION_ID = 342626; // Seu physician_id
         window.CONFIG_CLINIC_INDEX = 0; // Se houver apenas uma clínica
-        window.CONFIG_CLINIC_SELECTOR = true; // Mostra o seletor de clínica
-        window.CONFIG_WHATSAPP_API_NOTIFICATION = false; // Notificação via WhatsApp desativada
+        window.CONFIG_CLINIC_SELECTOR = true; // Seletor de clínica
+        window.CONFIG_WHATSAPP_API_NOTIFICATION = false; // WhatsApp desativado
         window.CONFIG_STYLE_OPTIONS = {
-            inheritSiteFont: false // Não herda a fonte do site hospedeiro
+            inheritSiteFont: false // Não herda a fonte do site
         };
     </script>
 
+    <!-- Script do iClinic para agendamento -->
     <script src="https://cdn.iclinicservices.com.br/iclinic/widget-schedulev2/js/iclinic-agendar-consulta.js"></script>
 </body>
 </html>
