@@ -3,101 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agendamento de Consultas</title>
+    <title>Agendamento de Consulta</title>
 </head>
 <body>
-    <h1>Agendamento de Consultas</h1>
-    
-    <form id="appointment-form">
-        <label for="name">Nome:</label>
-        <input type="text" id="name" required><br><br>
+    <h2>Agendamento de Consulta</h2>
+    <form id="agendamentoForm">
+        <label for="nome">Nome Completo:</label>
+        <input type="text" id="nome" name="nome" required><br>
+
+        <label for="nascimento">Data de Nascimento:</label>
+        <input type="date" id="nascimento" name="nascimento" required><br>
+
+        <label for="responsavel">Nome do Responsável:</label>
+        <input type="text" id="responsavel" name="responsavel" required><br>
+
+        <label for="telefone">Telefone:</label>
+        <input type="tel" id="telefone" name="telefone" required><br>
 
         <label for="email">E-mail:</label>
-        <input type="email" id="email" required><br><br>
+        <input type="email" id="email" name="email" required><br>
 
-        <label for="date">Data:</label>
-        <input type="date" id="date" required><br><br>
+        <label for="encaminhado">Encaminhado por:</label>
+        <input type="text" id="encaminhado" name="encaminhado"><br>
 
-        <label for="time">Horário:</label>
-        <input type="time" id="time" required><br><br>
+        <label for="horario">Escolha um horário:</label>
+        <select id="horario" name="horario" required></select><br>
 
-        <label for="duration">Duração (em minutos):</label>
-        <input type="number" id="duration" required min="15"><br><br>
-
-        <input type="submit" value="Agendar Consulta">
+        <button type="submit">Agendar</button>
     </form>
 
-    <div id="confirmation"></div>
+    <script src="https://www.gstatic.com/firebasejs/8.3.3/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.3.3/firebase-firestore.js"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
 
     <script>
-        // Carrega a API do Google Client
-        function loadGoogleAPI() {
-            gapi.load('client:auth2', initGoogleClient);
+        // Configuração Firebase
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY",
+            authDomain: "SEU_DOMÍNIO_AUTH",
+            projectId: "SEU_ID_PROJETO",
+            storageBucket: "SEU_BUCKET_STORAGE",
+            messagingSenderId: "SEU_ID_MENSAGENS",
+            appId: "SEU_ID_APP"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Função para gerar os horários permitidos
+        function gerarHorarios() {
+            const horarios = [];
+            const diasPermitidos = {
+                'segunda': { start: 8, end: 12 },
+                'quarta': { start: 17, end: 20 },
+                'quinta': { start: 17, end: 20 }
+            };
+
+            const dataAtual = new Date();
+            const proximoDia = (dia) => {
+                let resultado = new Date();
+                resultado.setDate(dataAtual.getDate() + ((7 - dataAtual.getDay() + dia) % 7));
+                return resultado;
+            };
+
+            for (let dia in diasPermitidos) {
+                let diaNumero;
+                if (dia === 'segunda') diaNumero = 1;
+                if (dia === 'quarta') diaNumero = 3;
+                if (dia === 'quinta') diaNumero = 4;
+
+                const proximo = proximoDia(diaNumero);
+                const { start, end } = diasPermitidos[dia];
+
+                for (let hora = start; hora < end; hora++) {
+                    horarios.push(`${proximo.toISOString().split('T')[0]} ${hora}:00`);
+                    horarios.push(`${proximo.toISOString().split('T')[0]} ${hora}:30`);
+                }
+            }
+            return horarios;
         }
 
-        function initGoogleClient() {
+        // Preencher o seletor de horários
+        const selectHorario = document.getElementById('horario');
+        const horariosDisponiveis = gerarHorarios();
+        horariosDisponiveis.forEach(horario => {
+            const option = document.createElement('option');
+            option.value = horario;
+            option.textContent = horario;
+            selectHorario.appendChild(option);
+        });
+
+        // Função para enviar os dados para o Firebase e Google Calendar
+        async function enviarAgendamento(dadosPaciente) {
+            try {
+                await db.collection('agendamentos').add(dadosPaciente);
+                alert("Agendamento realizado com sucesso!");
+
+                // Chamar função para adicionar ao Google Calendar
+                adicionarNoGoogleAgenda(dadosPaciente);
+            } catch (error) {
+                console.error("Erro ao realizar agendamento: ", error);
+            }
+        }
+
+        // Configuração do Google Calendar
+        function gapiLoaded() {
+            gapi.load('client:auth2', initializeGapiClient);
+        }
+
+        function initializeGapiClient() {
             gapi.client.init({
-                apiKey: 'YOUR_API_KEY',
-                clientId: 'YOUR_CLIENT_ID',
-                discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
-                scope: "https://www.googleapis.com/auth/calendar.events"
-            }).then(function () {
-                // Lidar com autenticação
-                gapi.auth2.getAuthInstance().signIn().then(function () {
-                    console.log('Autenticado');
+                'apiKey': 'SUA_GOOGLE_API_KEY',
+                'clientId': 'SEU_CLIENT_ID',
+                'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
+                'scope': 'https://www.googleapis.com/auth/calendar.events'
+            }).then(() => {
+                console.log("Google Calendar API initialized");
+            });
+        }
+
+        function adicionarNoGoogleAgenda(dadosPaciente) {
+            const event = {
+                'summary': `Consulta de ${dadosPaciente.nome}`,
+                'description': `Consulta encaminhada por: ${dadosPaciente.encaminhado}. Telefone: ${dadosPaciente.telefone}`,
+                'start': {
+                    'dateTime': new Date(dadosPaciente.horario).toISOString(),
+                    'timeZone': 'America/Sao_Paulo'
+                },
+                'end': {
+                    'dateTime': new Date(new Date(dadosPaciente.horario).getTime() + 30 * 60000).toISOString(),
+                    'timeZone': 'America/Sao_Paulo'
+                },
+                'attendees': [
+                    {'email': dadosPaciente.email}
+                ]
+            };
+
+            gapi.auth2.getAuthInstance().signIn().then(() => {
+                const request = gapi.client.calendar.events.insert({
+                    'calendarId': 'primary',
+                    'resource': event
+                });
+
+                request.execute((event) => {
+                    console.log('Evento criado: ', event.htmlLink);
                 });
             });
         }
 
-        // Função para adicionar evento à Google Calendar
-        function addEventToCalendar(event) {
-            var request = gapi.client.calendar.events.insert({
-                'calendarId': 'gabriel@franceschi.com.br',
-                'resource': event
-            });
-
-            request.execute(function (event) {
-                document.getElementById('confirmation').innerHTML = 'Consulta agendada com sucesso: ' + event.htmlLink;
-            });
-        }
-
-        document.getElementById('appointment-form').addEventListener('submit', function (e) {
+        document.getElementById('agendamentoForm').addEventListener('submit', (e) => {
             e.preventDefault();
 
-            var name = document.getElementById('name').value;
-            var email = document.getElementById('email').value;
-            var date = document.getElementById('date').value;
-            var time = document.getElementById('time').value;
-            var duration = document.getElementById('duration').value;
-
-            var event = {
-                'summary': 'Consulta com ' + name,
-                'description': 'Consulta agendada por ' + email,
-                'start': {
-                    'dateTime': date + 'T' + time + ':00',
-                    'timeZone': 'America/Sao_Paulo'
-                },
-                'end': {
-                    'dateTime': date + 'T' + time + ':00',
-                    'timeZone': 'America/Sao_Paulo'
-                },
-                'attendees': [{'email': email}],
-                'reminders': {
-                    'useDefault': false,
-                    'overrides': [
-                        {'method': 'email', 'minutes': 24 * 60},
-                        {'method': 'popup', 'minutes': 10}
-                    ]
-                }
+            const dadosPaciente = {
+                nome: document.getElementById('nome').value,
+                nascimento: document.getElementById('nascimento').value,
+                responsavel: document.getElementById('responsavel').value,
+                telefone: document.getElementById('telefone').value,
+                email: document.getElementById('email').value,
+                encaminhado: document.getElementById('encaminhado').value,
+                horario: document.getElementById('horario').value
             };
 
-            addEventToCalendar(event);
+            enviarAgendamento(dadosPaciente);
         });
 
-        // Inicia a API do Google ao carregar a página
-        loadGoogleAPI();
+        // Carregar a API do Google Calendar
+        gapi.load('client:auth2', gapiLoaded);
     </script>
-
-    <script async defer src="https://apis.google.com/js/api.js"></script>
 </body>
 </html>
