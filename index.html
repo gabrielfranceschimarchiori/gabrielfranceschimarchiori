@@ -4,33 +4,111 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agendamento de Consulta</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f8fb;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h2 {
+            text-align: center;
+            color: #1e90ff;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="tel"],
+        input[type="email"],
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            font-size: 16px;
+        }
+
+        input[type="submit"], button {
+            width: 100%;
+            padding: 10px;
+            background-color: #ff7f50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        input[type="submit"]:hover, button:hover {
+            background-color: #ff6347;
+        }
+
+        .success-message {
+            text-align: center;
+            color: #1e90ff;
+            font-size: 18px;
+            margin-top: 20px;
+            display: none;
+        }
+
+    </style>
 </head>
 <body>
-    <h2>Agendamento de Consulta</h2>
-    <form id="agendamentoForm">
-        <label for="nome">Nome Completo:</label>
-        <input type="text" id="nome" name="nome" required><br>
+    <div class="container">
+        <h2>Agendamento de Consulta</h2>
+        <form id="agendamentoForm">
+            <label for="nome">Nome Completo:</label>
+            <input type="text" id="nome" name="nome" required>
 
-        <label for="nascimento">Data de Nascimento:</label>
-        <input type="date" id="nascimento" name="nascimento" required><br>
+            <label for="nascimento">Data de Nascimento:</label>
+            <input type="date" id="nascimento" name="nascimento" required>
 
-        <label for="responsavel">Nome do Responsável:</label>
-        <input type="text" id="responsavel" name="responsavel" required><br>
+            <label for="responsavel">Nome do Responsável:</label>
+            <input type="text" id="responsavel" name="responsavel" required>
 
-        <label for="telefone">Telefone:</label>
-        <input type="tel" id="telefone" name="telefone" required><br>
+            <label for="telefone">Telefone:</label>
+            <input type="tel" id="telefone" name="telefone" required>
 
-        <label for="email">E-mail:</label>
-        <input type="email" id="email" name="email" required><br>
+            <label for="email">E-mail:</label>
+            <input type="email" id="email" name="email" required>
 
-        <label for="encaminhado">Encaminhado por:</label>
-        <input type="text" id="encaminhado" name="encaminhado"><br>
+            <label for="encaminhado">Encaminhado por:</label>
+            <input type="text" id="encaminhado" name="encaminhado">
 
-        <label for="horario">Escolha um horário:</label>
-        <select id="horario" name="horario" required></select><br>
+            <label for="horario">Escolha um horário:</label>
+            <select id="horario" name="horario" required></select>
 
-        <button type="submit">Agendar</button>
-    </form>
+            <input type="submit" value="Agendar">
+        </form>
+        <div class="success-message" id="successMessage">
+            Agendamento solicitado - Aguarde confirmação.
+        </div>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.3.3/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.3.3/firebase-firestore.js"></script>
@@ -92,62 +170,26 @@
             selectHorario.appendChild(option);
         });
 
-        // Função para enviar os dados para o Firebase e Google Calendar
+        // Função para enviar os dados para o Firebase
         async function enviarAgendamento(dadosPaciente) {
             try {
                 await db.collection('agendamentos').add(dadosPaciente);
-                alert("Agendamento realizado com sucesso!");
-
-                // Chamar função para adicionar ao Google Calendar
-                adicionarNoGoogleAgenda(dadosPaciente);
+                limparCampos();
+                mostrarMensagemSucesso();
             } catch (error) {
                 console.error("Erro ao realizar agendamento: ", error);
             }
         }
 
-        // Configuração do Google Calendar
-        function gapiLoaded() {
-            gapi.load('client:auth2', initializeGapiClient);
+        // Limpar campos após o envio
+        function limparCampos() {
+            document.getElementById('agendamentoForm').reset();
         }
 
-        function initializeGapiClient() {
-            gapi.client.init({
-                'apiKey': 'SUA_GOOGLE_API_KEY',
-                'clientId': 'SEU_CLIENT_ID',
-                'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
-                'scope': 'https://www.googleapis.com/auth/calendar.events'
-            }).then(() => {
-                console.log("Google Calendar API initialized");
-            });
-        }
-
-        function adicionarNoGoogleAgenda(dadosPaciente) {
-            const event = {
-                'summary': `Consulta de ${dadosPaciente.nome}`,
-                'description': `Consulta encaminhada por: ${dadosPaciente.encaminhado}. Telefone: ${dadosPaciente.telefone}`,
-                'start': {
-                    'dateTime': new Date(dadosPaciente.horario).toISOString(),
-                    'timeZone': 'America/Sao_Paulo'
-                },
-                'end': {
-                    'dateTime': new Date(new Date(dadosPaciente.horario).getTime() + 30 * 60000).toISOString(),
-                    'timeZone': 'America/Sao_Paulo'
-                },
-                'attendees': [
-                    {'email': dadosPaciente.email}
-                ]
-            };
-
-            gapi.auth2.getAuthInstance().signIn().then(() => {
-                const request = gapi.client.calendar.events.insert({
-                    'calendarId': 'primary',
-                    'resource': event
-                });
-
-                request.execute((event) => {
-                    console.log('Evento criado: ', event.htmlLink);
-                });
-            });
+        // Mostrar mensagem de sucesso
+        function mostrarMensagemSucesso() {
+            const successMessage = document.getElementById('successMessage');
+            successMessage.style.display = 'block';
         }
 
         document.getElementById('agendamentoForm').addEventListener('submit', (e) => {
@@ -165,9 +207,6 @@
 
             enviarAgendamento(dadosPaciente);
         });
-
-        // Carregar a API do Google Calendar
-        gapi.load('client:auth2', gapiLoaded);
     </script>
 </body>
 </html>
