@@ -5,210 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agendamento de Consulta</title>
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f8fb;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+        /* Theme color */
+        .style-option-first-color { color: #1f92c2; }
+        .style-option-first-color-bg { background-color: #1f92c2; }
+        .style-option-first-color-bg-hover:hover { background-color: #02aaf0; }
+        .style-option-first-color-border { border: 1px solid #1f92c2; }
 
-        .container {
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            width: 100%;
-        }
+        /* Default background color */
+        .style-option-second-color { color: #ffffff; }
+        .style-option-second-color-bg { background-color: #ffffff; }
+        .style-option-second-color-bg-hover:hover { background-color: #f3f3f3; }
+        .style-option-second-color-border { border: 1px solid #ffffff; }
 
-        h2 {
-            text-align: center;
-            color: #1e90ff;
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        input[type="text"],
-        input[type="date"],
-        input[type="tel"],
-        input[type="email"],
-        select {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background-color: #f9f9f9;
-            font-size: 16px;
-        }
-
-        input[type="submit"], button {
-            width: 100%;
-            padding: 10px;
-            background-color: #ff7f50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-        }
-
-        input[type="submit"]:hover, button:hover {
-            background-color: #ff6347;
-        }
-
-        .success-message {
-            text-align: center;
-            color: #1e90ff;
-            font-size: 18px;
-            margin-top: 20px;
-            display: none;
-        }
+        /* Rounded buttons */
+        .style-option-rounded-button { border-radius: 30px; }
+        .style-option-rounded-plus-button { border-radius: 50%; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Agendamento de Consulta</h2>
-        <form id="agendamentoForm">
-            <label for="nome">Nome Completo:</label>
-            <input type="text" id="nome" name="nome" required>
-
-            <label for="nascimento">Data de Nascimento:</label>
-            <input type="date" id="nascimento" name="nascimento" required>
-
-            <label for="responsavel">Nome do Responsável:</label>
-            <input type="text" id="responsavel" name="responsavel" required>
-
-            <label for="telefone">Telefone:</label>
-            <input type="tel" id="telefone" name="telefone" required>
-
-            <label for="email">E-mail:</label>
-            <input type="email" id="email" name="email" required>
-
-            <label for="encaminhado">Encaminhado por:</label>
-            <input type="text" id="encaminhado" name="encaminhado">
-
-            <label for="horario">Escolha um horário:</label>
-            <select id="horario" name="horario" required></select>
-
-            <input type="submit" value="Agendar">
-        </form>
-        <div class="success-message" id="successMessage">
-            Agendamento solicitado - Aguarde confirmação.
-        </div>
+    <!-- Agendamento iClinic -->
+    <div class="widget-schedule-parent-element" style="width: 1000px; max-width: 100%; margin: 0 auto;">
+        <div id="widget-schedule-root"></div>
     </div>
 
-    <!-- Firebase Scripts -->
-    <script src="https://www.gstatic.com/firebasejs/8.3.3/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.3.3/firebase-firestore.js"></script>
-
+    <!-- Agendamento iClinic -->
     <script>
-        // Configuração Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyDP7QwghuRl7Ui_Fh8fVDdQqDPUbOWJvYg",
-            authDomain: "gfm-ped.firebaseapp.com",
-            databaseURL: "https://gfm-ped-default-rtdb.firebaseio.com",
-            projectId: "gfm-ped",
-            storageBucket: "gfm-ped.appspot.com",
-            messagingSenderId: "119991592409",
-            appId: "1:119991592409:web:ed9db226c870af8d94a5c8",
-            measurementId: "G-24SFE2E057"
+        window.CONFIG_SUBSCRIPTION_ID = 342626; // Seu physician_id
+        window.CONFIG_CLINIC_INDEX = 0; // Se houver apenas uma clínica
+        window.CONFIG_CLINIC_SELECTOR = true; // Mostra o seletor de clínica
+        window.CONFIG_WHATSAPP_API_NOTIFICATION = false; // Notificação via WhatsApp desativada
+        window.CONFIG_STYLE_OPTIONS = {
+            inheritSiteFont: false // Não herda a fonte do site hospedeiro
         };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        // Função para gerar os horários permitidos
-        function gerarHorarios() {
-            const horarios = [];
-            const diasPermitidos = {
-                'segunda': { start: 8, end: 12 },
-                'quarta': { start: 17, end: 20 },
-                'quinta': { start: 17, end: 20 }
-            };
-
-            const dataAtual = new Date();
-            const proximoDia = (dia) => {
-                let resultado = new Date();
-                resultado.setDate(dataAtual.getDate() + ((7 - dataAtual.getDay() + dia) % 7));
-                return resultado;
-            };
-
-            for (let dia in diasPermitidos) {
-                let diaNumero;
-                if (dia === 'segunda') diaNumero = 1;
-                if (dia === 'quarta') diaNumero = 3;
-                if (dia === 'quinta') diaNumero = 4;
-
-                const proximo = proximoDia(diaNumero);
-                const { start, end } = diasPermitidos[dia];
-
-                for (let hora = start; hora < end; hora++) {
-                    horarios.push(`${proximo.toISOString().split('T')[0]} ${hora}:00`);
-                    horarios.push(`${proximo.toISOString().split('T')[0]} ${hora}:30`);
-                }
-            }
-            return horarios;
-        }
-
-        // Preencher o seletor de horários
-        const selectHorario = document.getElementById('horario');
-        const horariosDisponiveis = gerarHorarios();
-        horariosDisponiveis.forEach(horario => {
-            const option = document.createElement('option');
-            option.value = horario;
-            option.textContent = horario;
-            selectHorario.appendChild(option);
-        });
-
-        // Função para enviar os dados para o Firebase
-        async function enviarAgendamento(dadosPaciente) {
-            try {
-                await db.collection('agendamentos').add(dadosPaciente);
-                limparCampos();
-                mostrarMensagemSucesso();
-            } catch (error) {
-                console.error("Erro ao realizar agendamento: ", error);
-            }
-        }
-
-        // Limpar campos após o envio
-        function limparCampos() {
-            document.getElementById('agendamentoForm').reset();
-        }
-
-        // Mostrar mensagem de sucesso
-        function mostrarMensagemSucesso() {
-            const successMessage = document.getElementById('successMessage');
-            successMessage.style.display = 'block';
-        }
-
-        // Lógica do formulário de agendamento
-        document.getElementById('agendamentoForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-
-            const dadosPaciente = {
-                nome: document.getElementById('nome').value,
-                nascimento: document.getElementById('nascimento').value,
-                responsavel: document.getElementById('responsavel').value,
-                telefone: document.getElementById('telefone').value,
-                email: document.getElementById('email').value,
-                encaminhado: document.getElementById('encaminhado').value,
-                horario: document.getElementById('horario').value
-            };
-
-            enviarAgendamento(dadosPaciente);
-        });
     </script>
+
+    <script src="https://cdn.iclinicservices.com.br/iclinic/widget-schedulev2/js/iclinic-agendar-consulta.js"></script>
 </body>
 </html>
