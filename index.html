@@ -22,7 +22,7 @@
             border-radius: 15px;
             box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
             max-width: 400px;
-            width: 90%; /* Ajuste para telas pequenas */
+            width: 100%;
         }
 
         h2 {
@@ -75,37 +75,6 @@
             margin-top: 20px;
             display: none;
         }
-
-        /* Media Queries para telas menores */
-        @media (max-width: 600px) {
-            .container {
-                padding: 20px;
-                max-width: 70%; /* Mais flexível para telas menores */
-            }
-
-            input[type="text"],
-            input[type="date"],
-            input[type="tel"],
-            input[type="email"],
-            select {
-                font-size: 14px; /* Texto menor em telas menores */
-            }
-
-            input[type="submit"], button {
-                font-size: 14px; /* Botão menor em telas menores */
-            }
-
-            h2 {
-                font-size: 24px; /* Título menor em telas menores */
-            }
-        }
-
-        /* Media Queries para telas maiores */
-        @media (min-width: 768px) {
-            .container {
-                max-width: 500px; /* Aumenta a largura em telas maiores */
-            }
-        }
     </style>
 </head>
 <body>
@@ -140,19 +109,21 @@
         </div>
     </div>
 
+    <!-- Firebase Scripts -->
     <script src="https://www.gstatic.com/firebasejs/8.3.3/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.3.3/firebase-firestore.js"></script>
-    <script src="https://apis.google.com/js/api.js"></script>
 
     <script>
         // Configuração Firebase
         const firebaseConfig = {
-            apiKey: "SUA_API_KEY",
-            authDomain: "SEU_DOMÍNIO_AUTH",
-            projectId: "SEU_ID_PROJETO",
-            storageBucket: "SEU_BUCKET_STORAGE",
-            messagingSenderId: "SEU_ID_MENSAGENS",
-            appId: "SEU_ID_APP"
+            apiKey: "AIzaSyDP7QwghuRl7Ui_Fh8fVDdQqDPUbOWJvYg",
+            authDomain: "gfm-ped.firebaseapp.com",
+            databaseURL: "https://gfm-ped-default-rtdb.firebaseio.com",
+            projectId: "gfm-ped",
+            storageBucket: "gfm-ped.appspot.com",
+            messagingSenderId: "119991592409",
+            appId: "1:119991592409:web:ed9db226c870af8d94a5c8",
+            measurementId: "G-24SFE2E057"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
@@ -222,6 +193,7 @@
             successMessage.style.display = 'block';
         }
 
+        // Lógica do formulário de agendamento
         document.getElementById('agendamentoForm').addEventListener('submit', (e) => {
             e.preventDefault();
 
