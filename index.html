@@ -4,26 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agendamento Online</title>
-</head>
-<body>
-    <!-- Agendamento iClinic -->
-    <script>
-        window.CONFIG_SUBSCRIPTION_ID = 309878;
-        window.CONFIG_CLINIC_INDEX = 0;
-        window.CONFIG_CLINIC_SELECTOR = true;
-        window.CONFIG_WHATSAPP_API_NOTIFICATION = false;
-        window.CONFIG_STYLE_OPTIONS = {
-            inheritSiteFont: false
-        };
-    </script>
-
     <style>
         /* Theme color */
         .style-option-first-color { color: #1f92c2; }
         .style-option-first-color-bg { background-color: #1f92c2; }
         .style-option-first-color-bg-hover:hover { background-color: #02aaf0; }
         .style-option-first-color-border { border: 1px solid #1f92c2; }
-
+        
         /* Default background color */
         .style-option-second-color { color: #ffffff; }
         .style-option-second-color-bg { background-color: #ffffff; }
@@ -34,13 +21,27 @@
         .style-option-rounded-button { border-radius: 30px; }
         .style-option-rounded-plus-button { border-radius: 50%; }
     </style>
-
+</head>
+<body>
+    <h1>Agendamento Online</h1>
+    <!-- Agendamento iClinic -->
     <div class="widget-schedule-parent-element" style="width: 1000px; max-width: 100%; margin: 0 auto;">
         <div id="widget-schedule-root"></div>
     </div>
     <!-- Agendamento iClinic -->
 
-    <!-- Código da aplicação -->
+    <!-- Código de configuração -->
+    <script>
+        window.CONFIG_SUBSCRIPTION_ID = 309878;  // Physician ID correto
+        window.CONFIG_CLINIC_INDEX = 0;  // Primeira clínica exibida
+        window.CONFIG_CLINIC_SELECTOR = true;  // Exibir seletor de clínicas
+        window.CONFIG_WHATSAPP_API_NOTIFICATION = false;  // Sem notificação via WhatsApp API
+        window.CONFIG_STYLE_OPTIONS = {
+            inheritSiteFont: false  // Não herdar a fonte do site
+        };
+    </script>
+
+    <!-- Script do iClinic -->
     <script src="https://cdn.iclinicservices.com.br/iclinic/widget-schedulev2/js/iclinic-agendar-consulta.js"></script>
 </body>
 </html>
