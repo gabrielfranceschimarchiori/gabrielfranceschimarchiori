@@ -3,39 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agendamento de Consulta</title>
-    <style>
-        /* Estilos básicos para o widget de agendamento */
-        .style-option-first-color { color: #1f92c2; }
-        .style-option-first-color-bg { background-color: #1f92c2; }
-        .style-option-first-color-border { border: 1px solid #1f92c2; }
-
-        .style-option-second-color { color: #ffffff; }
-        .style-option-second-color-bg { background-color: #ffffff; }
-        .style-option-second-color-border { border: 1px solid #ffffff; }
-
-        .style-option-rounded-button { border-radius: 30px; }
-    </style>
+    <title>Agendamento</title>
 </head>
 <body>
-    <!-- Widget de Agendamento iClinic -->
-    <div class="widget-schedule-parent-element" style="width: 100%; max-width: 1000px; margin: 0 auto;">
-        <div id="widget-schedule-root"></div>
-    </div>
-
-    <!-- Configuração do Agendamento iClinic -->
-    <script>
-        // Configurações de agendamento
-        window.CONFIG_SUBSCRIPTION_ID = 309878; // Seu physician_id corrigido
-        window.CONFIG_CLINIC_INDEX = 0; // Se houver apenas uma clínica
-        window.CONFIG_CLINIC_SELECTOR = false; // Desabilitado, pois só há uma clínica
-        window.CONFIG_WHATSAPP_API_NOTIFICATION = false; // WhatsApp desativado
-        window.CONFIG_STYLE_OPTIONS = {
-            inheritSiteFont: false // Se false, não herda a fonte do site hospedeiro
-        };
-    </script>
-
-    <!-- Script de integração iClinic -->
-    <script src="https://cdn.iclinicservices.com.br/iclinic/widget-schedulev2/js/iclinic-agendar-consulta.js"></script>
 </body>
 </html>
